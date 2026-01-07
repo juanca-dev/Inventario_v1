@@ -1,4 +1,51 @@
-     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvwl7i0UPPuSHnO8PuLx_yEWoPgf2-YMlvATkkAwqKoJ6uwYmDMZZbkQZxjCCu9Swn/exec'; 
+    // Configuración de acceso (Puedes cambiar estos valores)
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "1234"; 
+
+// ==========================================
+// CONTROL DE ACCESO MANUAL
+// ==========================================
+
+function checkSession() {
+    const isLogged = sessionStorage.getItem("isLoggedIn");
+    const overlay = document.getElementById("loginOverlay");
+    
+    if (isLogged === "true") {
+        overlay.style.display = "none";
+        initApp(); // Tu función que carga categorías y dashboard
+    } else {
+        overlay.style.display = "flex";
+    }
+}
+
+// Escuchador para el formulario de Login
+document.getElementById("manualLoginForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const user = document.getElementById("loginUser").value;
+    const pass = document.getElementById("loginPass").value;
+    const msg = document.getElementById("loginMsg");
+
+    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+        sessionStorage.setItem("isLoggedIn", "true");
+        msg.style.color = "#16a34a";
+        msg.textContent = "Acceso concedido. Cargando...";
+        
+        setTimeout(() => {
+            checkSession();
+        }, 1000);
+    } else {
+        msg.textContent = "Usuario o contraseña incorrectos";
+        document.getElementById("loginPass").value = "";
+    }
+});
+
+// Función para Cerrar Sesión (puedes añadir un botón en el sidebar para esto)
+function logout() {
+    sessionStorage.removeItem("isLoggedIn");
+    window.location.reload();
+}
+
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvwl7i0UPPuSHnO8PuLx_yEWoPgf2-YMlvATkkAwqKoJ6uwYmDMZZbkQZxjCCu9Swn/exec'; 
         let productDataCache = {};
         let resumenFinancieroChart, tendenciasChart;
 
@@ -6,6 +53,8 @@
             setupNavigation();
             loadInitialData();
             setupForms();
+            setupFormListeners();
+             checkSession(); // Solo arranca si hay sesión
         });
         
         function setupNavigation() {
